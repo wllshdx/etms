@@ -1,0 +1,49 @@
+# Tomcat
+server:
+  tomcat:
+    uri-encoding: UTF-8
+    max-threads: 1000
+    min-spare-threads: 30
+  #端口配置
+  port: 8086
+
+spring:
+  profiles:
+    # 环境 开发dev，测试test，生产prod
+    active: dev
+  devtools:
+    restart:
+      enabled: true  #设置开启热部署
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    database: 0
+    password: 123456
+  session:
+    store-type: redis
+    timeout: 86400
+  jackson:
+    time-zone: Asia/Shanghai
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/etms
+
+password:
+  salt: SHUETMS_WLL
+
+#mybatis
+mybatis-plus:
+  #mapper文件
+  mapper-locations: classpath:mapper/*.xml
+  #实体扫描，多个package用逗号或者分号分隔
+  type-aliases-package: cn.wllnb.etms.model.entity.*
+#  # 支持统配符 * 或者 ; 分割
+#  typeEnumsPackage: cn.wllnb.etms.common.enums.*
+
+#  #mybatis原生配置
+#  configuration:
+#    #驼峰下划线转换
+#    map-underscore-to-camel-case: true
+
+
+

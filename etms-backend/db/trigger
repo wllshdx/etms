@@ -1,0 +1,34 @@
+use etms;
+
+# xskc
+# 当删除学生课程表中某门课程的记录时，对应学生成绩表中所有有关此课程的记录均删除。
+delimiter |
+create trigger tri_student_delete1 after delete
+    on xskc for each row
+    begin
+        delete xscj from xscj
+            where xscj.course_number=old.course_number;
+    end |
+
+# 实现当修改学生课程表（xskc）中的某门课的课程号时，对应学生成绩表（xscj）中的课程号也作相应修改。
+delimiter |
+create trigger tri_student_update1 after update
+    on xskc   for each row
+    begin
+        update xscj
+            set xscj.course_number=new .course_number
+        where xscj.course_number = old.course_number;
+    end |
+
+
+# 当向学生成绩表（xscj）中插入一条选课记录时，查看该学生的信息是否存在在学生信息表中，如果不存在，则把该学生的基本信息加入到学生信息表中。
+delimiter |
+create trigger tri_student_insert1 after insert
+    on xscj  for each row
+begin
+    if not exists(select * from student where student_number=new.student_number) then
+        insert into student(student_number, student_name) values (new.student_number,new.student_name);
+     end if;
+end |
+
+

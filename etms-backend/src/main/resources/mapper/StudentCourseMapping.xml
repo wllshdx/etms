@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.wllnb.etms.mapper.StudentCourseMapper">
+    <select id="getPage" resultType="cn.wllnb.etms.model.vo.response.table.StudentCourseItemVO">
+        SELECT sc_id AS 'id', course_name AS 'courseName', student_name AS 'studentName',
+        oc_term as 'term', class_name AS 'className',
+        sc_daily_score AS 'dailyScore', sc_exam_score AS 'examScore', sc_score AS 'score'
+        FROM student_course sc
+        join opened_course oc on sc.oc_id = oc.oc_id
+        join student s on sc.sc_student_id = s.student_id
+        join course c on oc.oc_course_id = c.course_id
+        JOIN class on student_class_id = class_id
+        <where>
+            <if test="courseName != null and courseName != ''">
+                AND course_name LIKE CONCAT('%',#{courseName},'%')
+            </if>
+            <if test="studentName != null and studentName != ''">
+                AND student_name LIKE CONCAT('%',#{studentName},'%')
+            </if>
+            <if test="className != null and className != ''">
+                AND class_name LIKE CONCAT('%',#{className},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM student_course sc
+        join opened_course oc on sc.oc_id = oc.oc_id
+        join course c on oc.oc_course_id = c.course_id
+        join student s on sc.sc_student_id = s.student_id
+        JOIN class on student_class_id = class_id
+        <where>
+            <if test="courseName != null and courseName != ''">
+                AND course_name LIKE CONCAT('%',#{courseName},'%')
+            </if>
+            <if test="studentName != null and studentName != ''">
+                AND student_name LIKE CONCAT('%',#{studentName},'%')
+            </if>
+            <if test="className != null and className != ''">
+                AND class_name LIKE CONCAT('%',#{className},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="listStudentCourseSelected"
+            resultType="cn.wllnb.etms.model.vo.response.table.StudentCourseSelectedItemVO">
+        SELECT sc_id          AS 'studentCourseId',
+               course_name    AS 'courseName',
+               oc_term        as 'term',
+               teacher_name   AS 'teacherName',
+               course_credit  AS 'credit',
+               sc_daily_score AS 'dailyScore',
+               sc_exam_score  AS 'examScore',
+               sc_score       AS 'score'
+        FROM student_course sc
+                 join opened_course oc on sc.oc_id = oc.oc_id
+                 join course c on oc.oc_course_id = c.course_id
+                 join student s on sc.sc_student_id = s.student_id
+                 join teacher t on oc.oc_teacher_id = t.teacher_id
+        WHERE sc.sc_student_id = #{studentId}
+    </select>
+
+    <select id="listStudentExam" resultType="cn.wllnb.etms.model.vo.response.table.StudentExamItemVO">
+        SELECT sc_id                AS 'studentCourseId',
+               oc_term              as 'term',
+               course_name          AS 'courseName',
+               teacher_name         AS 'teacherName',
+               course_exam_date     as 'examDate',
+               course_exam_location AS 'examLocation'
+        FROM student_course sc
+                 join opened_course oc on sc.oc_id = oc.oc_id
+                 join course c on oc.oc_course_id = c.course_id
+                 join student s on sc.sc_student_id = s.student_id
+                 join teacher t on oc.oc_teacher_id = t.teacher_id
+        WHERE student_number = #{number}
+          AND sc_exam_score IS NULL
+    </select>
+
+    <select id="countStudentCourseSelectedByTimePart" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM student_course sc
+                 join opened_course oc on sc.oc_id = oc.oc_id
+                 join course c on oc.oc_course_id = c.course_id
+                 join student s on sc.sc_student_id = s.student_id
+        WHERE student_number = #{studentNumber}
+          AND oc.oc_time LIKE CONCAT(#{timePart}, '-%')
+    </select>
+
+    <select id="listStudentTimetable" resultType="cn.wllnb.etms.model.vo.response.table.TimetableItemVO">
+        SELECT oc_time      AS 'time',
+               course_name  AS 'courseName',
+               teacher_name AS 'teacherName',
+               oc_location  AS 'location'
+        FROM student_course sc
+                 join opened_course oc on sc.oc_id = oc.oc_id
+                 join course c on oc.oc_course_id = c.course_id
+                 join student s on sc.sc_student_id = s.student_id
+                 join teacher t on oc.oc_teacher_id = t.teacher_id
+        WHERE student_number = #{number}
+    </select>
+
+    <select id="getTeacherGradePage" resultType="cn.wllnb.etms.model.vo.response.table.TeacherGradeItemVO">
+        SELECT sc_id AS 'studentCourseId', course_name AS 'courseName',oc_term as 'term',
+        student_name AS 'studentName', sc_daily_score AS 'dailyScore',
+        sc_exam_score AS 'examScore', sc_score AS 'score'
+        FROM student_course sc
+        join opened_course oc on sc.oc_id = oc.oc_id
+        join course c on oc.oc_course_id = c.course_id
+        join student s on sc.sc_student_id = s.student_id
+        join teacher t on oc.oc_teacher_id = t.teacher_id
+        <where>
+            AND teacher_number = #{teacherNumber}
+            <if test="courseName != null and courseName != ''">
+                AND course_name LIKE CONCAT('%',#{courseName},'%')
+            </if>
+            <if test="studentName != null and studentName != ''">
+                AND student_name LIKE CONCAT('%',#{studentName},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="countTeacherGrade" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM student_course sc
+        join opened_course oc on sc.oc_id = oc.oc_id
+        join course c on oc.oc_course_id = c.course_id
+        join student s on sc.sc_student_id = s.student_id
+        join teacher t on oc.oc_teacher_id = t.teacher_id
+        <where>
+            AND teacher_number = #{teacherNumber}
+            <if test="courseName != null and courseName != ''">
+                AND course_name LIKE CONCAT('%',#{courseName},'%')
+            </if>
+            <if test="studentName != null and studentName != ''">
+                AND student_name LIKE CONCAT('%',#{studentName},'%')
+            </if>
+        </where>
+    </select>
+</mapper>

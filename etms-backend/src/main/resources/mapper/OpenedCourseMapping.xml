@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.wllnb.etms.mapper.OpenedCourseMapper">
+    <select id="getPage" resultType="cn.wllnb.etms.model.bo.OpenedCourseItemBO">
+        SELECT oc_id AS 'id', oc_term as 'term',course_name AS 'courseName', teacher_name AS 'teacherName',
+        department_name AS 'departmentName', course_grade AS 'grade',
+        oc_time AS 'time', oc_location as 'location', oc_selected_count AS 'selectedCount',
+        oc_max_size AS 'maxSize'
+        FROM opened_course as oc
+        join course c on oc.oc_course_id = c.course_id
+        join teacher t on oc.oc_teacher_id = t.teacher_id
+        JOIN department d on teacher_department_id = department_id
+        <where>
+            <if test="departmentName != null and departmentName != ''">
+                AND department_name LIKE CONCAT('%',#{departmentName},'%')
+            </if>
+            <if test="teacherName != null and teacherName != ''">
+                AND teacher_name LIKE CONCAT('%',#{teacherName},'%')
+            </if>
+            <if test="name != null and name != ''">
+                AND course_name LIKE CONCAT('%',#{name},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM opened_course oc
+        join course c on oc.oc_course_id = c.course_id
+        join teacher t on oc.oc_teacher_id = t.teacher_id
+        join department d on c.course_department_id = d.department_id
+        <where>
+            <if test="departmentName != null and departmentName != ''">
+                AND department_name LIKE CONCAT('%',#{departmentName},'%')
+            </if>
+            <if test="teacherName != null and teacherName != ''">
+                AND teacher_name LIKE CONCAT('%',#{teacherName},'%')
+            </if>
+            <if test="name != null and name != ''">
+                AND course_name LIKE CONCAT('%',#{name},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="getStudentCanSelectPage" resultType="cn.wllnb.etms.model.bo.StudentCourseSelectItemBO">
+        SELECT oc.oc_id AS 'openedCourseId', oc_term as 'term',
+                course_name AS 'courseName', teacher_name AS 'teacherName',
+                oc_time AS 'time', course_credit AS 'credit',
+                oc_selected_count AS 'selectedCount', oc_max_size AS 'maxSize'
+        FROM opened_course oc
+        join course c on oc.oc_course_id = c.course_id
+        join teacher t on oc.oc_teacher_id = t.teacher_id
+      join department d on c.course_department_id = d.department_id
+        AND oc_id NOT IN (
+            SELECT oc2.oc_id
+            FROM opened_course oc2
+            join student_course sc2 on oc2.oc_id = sc2.oc_id
+            join student s2 on sc2.sc_student_id = s2.student_id
+            WHERE s2.student_number = #{studentNumber}
+        )
+        <where>
+            <if test="departmentName != null and departmentName != ''">
+                AND department_name LIKE CONCAT('%',#{departmentName},'%')
+            </if>
+            <if test="courseName != null and courseName != ''">
+                AND course_name LIKE CONCAT('%',#{courseName},'%')
+            </if>
+            <if test="teacherName != null and teacherName != ''">
+                AND teacher_name LIKE CONCAT('%',#{teacherName},'%')
+            </if>
+        </where>
+        AND oc_selected_count &lt; oc_max_size
+    </select>
+
+    <select id="countStudentCanSelect" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM (
+        SELECT DISTINCT oc.oc_id
+        FROM opened_course oc
+        join course c on oc.oc_course_id = c.course_id
+        join teacher t on oc.oc_teacher_id = t.teacher_id
+        join department d on c.course_department_id = d.department_id
+        AND oc.oc_id NOT IN (
+            SELECT oc2.oc_id
+            FROM opened_course oc2
+            join student_course sc2 on oc2.oc_id = sc2.oc_id
+            join student s on s.student_id = sc2.sc_student_id
+            WHERE s.student_number = #{studentNumber}
+        )
+        <where>
+            <if test="departmentName != null and departmentName != ''">
+                AND department_name LIKE CONCAT('%',#{departmentName},'%')
+            </if>
+            <if test="courseName != null and courseName != ''">
+                AND course_name LIKE CONCAT('%',#{courseName},'%')
+            </if>
+            <if test="teacherName != null and teacherName != ''">
+                AND teacher_name LIKE CONCAT('%',#{teacherName},'%')
+            </if>
+        </where>
+        AND oc_selected_count &lt; oc_max_size) cnt;
+    </select>
+
+    <select id="listName" resultType="cn.wllnb.etms.model.vo.response.OpenedCourseVO">
+        SELECT oc_id        as 'id',
+               oc_term      as 'term',
+               course_name  as 'courseName',
+               teacher_name as 'teacherName',
+               oc_time      as 'time'
+        FROM opened_course oc
+                 join course c on oc.oc_course_id = c.course_id
+                 join teacher t on oc.oc_teacher_id = t.teacher_id
+    </select>
+
+</mapper>

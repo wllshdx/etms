@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.wllnb.etms.mapper.TeacherMapper">
+    <select id="getPage" resultType="cn.wllnb.etms.model.vo.response.table.TeacherItemVO">
+        SELECT teacher_id as 'id', teacher_number AS 'number', department_name AS 'departmentName',
+        teacher_name AS 'name', teacher_gender as 'gender',
+        teacher_birthdate as 'birthDate', teacher_degree as 'degree',
+        teacher_base_salary as 'baseSalary'
+        FROM teacher
+        JOIN department on teacher_department_id = department_id
+        <where>
+            <if test="departmentName != null and departmentName != ''">
+                AND department_name LIKE CONCAT('%',#{departmentName},'%')
+            </if>
+            <if test="name != null and name != ''">
+                AND teacher_name LIKE CONCAT('%',#{name},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM teacher
+        JOIN department on teacher_department_id = department_id
+        <where>
+            <if test="departmentName != null and departmentName != ''">
+                AND department_name LIKE CONCAT('%',#{departmentName},'%')
+            </if>
+            <if test="name != null and name != ''">
+                AND teacher_name LIKE CONCAT('%',#{name},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="listTeacherTimetable" resultType="cn.wllnb.etms.model.vo.response.table.TimetableItemVO">
+        SELECT oc.oc_time     AS 'time',
+               c.course_name  AS 'courseName',
+               teacher_name   AS 'teacherName',
+               oc.oc_location AS 'location'
+        FROM teacher t
+                 join opened_course oc on t.teacher_id = oc.oc_teacher_id
+                 join course c on oc.oc_course_id = c.course_id
+        WHERE teacher_number = #{teacherNumber}
+    </select>
+
+    <select id="listTeacherCourse" resultType="cn.wllnb.etms.model.vo.response.table.TeacherCourseItemVO">
+        SELECT course_number     AS 'number',
+               oc_term           as 'term',
+               course_name       AS 'name',
+               course_grade      AS 'grade',
+               course_credit     AS 'credit',
+               oc.oc_time        AS 'time',
+               oc_location       AS 'location',
+               oc_selected_count AS 'selectedCount',
+               course_exam_date  AS 'examDate'
+        FROM teacher t
+                 join opened_course oc on t.teacher_id = oc.oc_teacher_id
+                 join course c on oc.oc_course_id = c.course_id
+        WHERE teacher_number = #{teacherNumber}
+    </select>
+</mapper>

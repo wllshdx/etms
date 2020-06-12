@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.wllnb.etms.mapper.CourseMapper">
+    <select id="getPage" resultType="cn.wllnb.etms.model.vo.response.table.CourseItemVO">
+        SELECT course_number AS 'id', course_number as 'number', course_name AS 'name',
+        department_name AS 'departmentName', course_grade AS 'grade', course_credit AS 'credit',
+        course_time as 'time'
+        FROM course
+        JOIN department on department_id = course_department_id
+        <where>
+            <if test="departmentName != null and departmentName != ''">
+                AND department_name LIKE CONCAT('%',#{departmentName},'%')
+            </if>
+            <if test="name != null and name != ''">
+                AND course_name LIKE CONCAT('%',#{name},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM course
+        JOIN department on department_id = course_department_id
+        <where>
+            <if test="departmentName != null and departmentName != ''">
+                AND department_name LIKE CONCAT('%',#{departmentName},'%')
+            </if>
+            <if test="name != null and name != ''">
+                AND course_name LIKE CONCAT('%',#{name},'%')
+            </if>
+        </where>
+    </select>
+
+</mapper>
